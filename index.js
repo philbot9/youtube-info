@@ -39,8 +39,6 @@ module.exports = function fetchVideoInfo (videoId, callback) {
   return pendingPromise;
 
   function parseVideoInfo (body) {
-    //console.log(body);
-
     debug('Parsing YouTube page %s', videoId);
     var $ = cheerio.load(body);
 
