@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var fetchVideoInfo = require('../index');
 
-describe('youtube-video-info', function () {
+describe('youtube-info', function () {
   it('should export a function', function () {
     expect(require('../index')).to.be.a('function');
   });

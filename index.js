@@ -1,14 +1,14 @@
 var request = require('request-promise');
 var cheerio = require('cheerio');
 var debug = require('debug')('youtube-video-info');
-var _ = require('lodash');
+var isFunction = require('lodash.isfunction');
 
 module.exports = function fetchVideoInfo (videoId, callback) {
   if (!videoId) {
     throw new Error('No video ID is provided.');
   }
 
-  var useCallback = callback && _.isFunction(callback);
+  var useCallback = callback && isFunction(callback);
   debug('Fetching YouTube page for %s', videoId);
 
   var pendingPromise = request({
