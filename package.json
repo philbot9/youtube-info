@@ -6,6 +6,10 @@
   "scripts": {
     "test": "mocha test"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philbot9/youtube-info.git"
+  },
   "keywords": [
     "youtube",
     "video",
