@@ -1,0 +1,29 @@
+{
+  "name": "youtube-video-info",
+  "version": "1.0.0",
+  "description": "Fetch meta information about YouTube videos",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "keywords": [
+    "youtube",
+    "video",
+    "info",
+    "information",
+    "fetch",
+    "scraper"
+  ],
+  "author": "Philip Klostermann <philip.klostermann@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.19.0",
+    "debug": "^2.2.0",
+    "lodash": "^3.10.1",
+    "request-promise": "^1.0.2"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "^2.3.4"
+  }
+}
