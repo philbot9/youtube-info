@@ -69,6 +69,7 @@ fetchVideoInfo('{videoId}', function (err, videoInfo) {
   duration: {video duration in seconds},
   views: {number of views},
   regionsAllowed: [ '{two letter country code}', ... ],
+  commentCount: {number of comments}
 }
 
 ```
