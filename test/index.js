@@ -64,9 +64,10 @@ describe('youtube-info', function () {
       expect(videoInfo).to.have.a.property('paid').which.is.a('boolean');
       expect(videoInfo).to.have.a.property('unlisted').which.is.a('boolean');
       expect(videoInfo).to.have.a.property('isFamilyFriendly').which.is.a('boolean');
-      expect(videoInfo).to.have.a.property('duration').which.is.a('number');
-      expect(videoInfo).to.have.a.property('views').which.is.a('number');
+      expect(videoInfo).to.have.a.property('duration').which.is.a('number').above(0);
+      expect(videoInfo).to.have.a.property('views').which.is.a('number').above(0);
       expect(videoInfo).to.have.a.property('regionsAllowed').which.is.a('array');
+      expect(videoInfo).to.have.a.property('commentCount').which.is.a('number').above(0);
       expect(videoInfo.regionsAllowed).to.have.length.above(0);
     });
   });

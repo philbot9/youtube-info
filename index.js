@@ -5,29 +5,23 @@ var isFunction = require('lodash.isfunction');
 
 module.exports = function fetchVideoInfo (videoId, callback) {
   if (!videoId) {
-    throw new Error('No video ID is provided.');
+    throw new Error('No video ID was provided.');
   }
 
-  var useCallback = callback && isFunction(callback);
   debug('Fetching YouTube page for %s', videoId);
 
-  var pendingPromise = request({
-    url: 'https://www.youtube.com/watch?v=' + videoId,
-    jar: true,
-    headers: {
-      'Host': 'www.youtube.com',
-      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5',
-      'Connection': 'keep-alive',
-      'Cache-Control': 'max-age=0'
-    }
-  }).then(parseVideoInfo).catch(function (reason) {
-    debug('Fetch failed %d - %s', reason.statusCode, reason.error);
-    throw new Error(reason);
+  var pendingPromise = fetchVideoPage(videoId).then(function (body) {
+    var videoInfo = parseVideoInfo(body);
+    var sessionToken = extractSessionToken(body);
+
+    debug('Found session token %s', sessionToken);
+    return fetchCommentCount(videoId, sessionToken).then(function (commentCount) {
+      videoInfo.commentCount = commentCount;
+      return videoInfo;
+    });
   });
 
-  if (useCallback) {
+  if (callback && isFunction(callback)) {
     pendingPromise.then(function (result) {
       callback(null, result);
     }).catch(function(err) {
@@ -37,6 +31,50 @@ module.exports = function fetchVideoInfo (videoId, callback) {
   }
 
   return pendingPromise;
+
+  function fetchVideoPage(videoId) {
+    return request({
+      url: 'https://www.youtube.com/watch?v=' + videoId,
+      jar: true,
+      headers: {
+        'Host': 'www.youtube.com',
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Connection': 'keep-alive',
+        'Cache-Control': 'max-age=0'
+      }
+    }).catch(function (reason) {
+      debug('Fetching video page failed %d - %s', reason.statusCode, reason.error);
+      throw new Error(reason);
+    });
+  }
+  
+  function fetchCommentCount(videoId, sessionToken) {
+    return request({
+      jar: true,
+      method: 'POST',
+      url: 'https://www.youtube.com/watch_fragments_ajax',
+      qs: { 
+        v: videoId,
+        tr: 'time',
+        distiller: '1',
+        frags: 'comments',
+        spf: 'load' 
+      },
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'cache-control': 'no-cache' 
+      },
+      form: {
+        session_token: sessionToken,
+        client_url: 'https://www.youtube.com/watch?v=' + videoId
+      } 
+    }).then(extractCommentCount).catch(function (reason) {
+      debug('Fetching comment page failed %d - %s', reason.statusCode, reason.error);
+      throw new Error(reason);
+    });
+  }
 
   function parseVideoInfo (body) {
     debug('Parsing YouTube page %s', videoId);
@@ -89,6 +127,26 @@ module.exports = function fetchVideoInfo (videoId, callback) {
       regionsAllowed: regionsAllowed
     };
   }
+}
+
+function extractSessionToken(body) {
+  var m = /XSRF_TOKEN':\s*"(.+?)",/i.exec(body);
+  return m ? m[1] : undefined;
+}
+
+function extractCommentCount(body) {
+  var response = JSON.parse(body);
+  if (!response || !response.body || !response.body['watch-discussion']) {
+    return 0;
+  }
+  
+  var $ = cheerio.load(response.body['watch-discussion']);
+  var m = /\(([\d,]+)\)/.exec($('.all-comments').text());
+  if (!m || !m[1]) {
+    return 0;
+  }
+  
+  return parseInt(m[1].replace(/[\s,]/g, ''), 10);
 }
 
 function extractValue($, attribute) {
