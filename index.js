@@ -1,38 +1,38 @@
-var request = require('request-promise');
-var cheerio = require('cheerio');
-var debug = require('debug')('youtube-video-info');
-var isFunction = require('lodash.isfunction');
+var request = require('request-promise')
+var cheerio = require('cheerio')
+var debug = require('debug')('youtube-video-info')
+var isFunction = require('lodash.isfunction')
 
 module.exports = function fetchVideoInfo (videoId, callback) {
   if (!videoId) {
-    throw new Error('No video ID was provided.');
+    throw new Error('No video ID was provided.')
   }
 
-  debug('Fetching YouTube page for %s', videoId);
+  debug('Fetching YouTube page for %s', videoId)
 
   var pendingPromise = fetchVideoPage(videoId).then(function (body) {
-    var videoInfo = parseVideoInfo(body);
-    var sessionToken = extractSessionToken(body);
+    var videoInfo = parseVideoInfo(body)
+    var sessionToken = extractSessionToken(body)
 
-    debug('Found session token %s', sessionToken);
+    debug('Found session token %s', sessionToken)
     return fetchCommentCount(videoId, sessionToken).then(function (commentCount) {
-      videoInfo.commentCount = commentCount;
-      return videoInfo;
-    });
-  });
+      videoInfo.commentCount = commentCount
+      return videoInfo
+    })
+  })
 
   if (callback && isFunction(callback)) {
     pendingPromise.then(function (result) {
-      callback(null, result);
-    }).catch(function(err) {
-      callback(err);
-    });
-    return;
+      callback(null, result)
+    }).catch(function (err) {
+      callback(err)
+    })
+    return
   }
 
-  return pendingPromise;
+  return pendingPromise
 
-  function fetchVideoPage(videoId) {
+  function fetchVideoPage (videoId) {
     return request({
       url: 'https://www.youtube.com/watch?v=' + videoId,
       jar: true,
@@ -45,68 +45,68 @@ module.exports = function fetchVideoInfo (videoId, callback) {
         'Cache-Control': 'max-age=0'
       }
     }).catch(function (reason) {
-      debug('Fetching video page failed %d - %s', reason.statusCode, reason.error);
-      throw new Error(reason);
-    });
+      debug('Fetching video page failed %d - %s', reason.statusCode, reason.error)
+      throw new Error(reason)
+    })
   }
-  
-  function fetchCommentCount(videoId, sessionToken) {
+
+  function fetchCommentCount (videoId, sessionToken) {
     return request({
       jar: true,
       method: 'POST',
       url: 'https://www.youtube.com/watch_fragments_ajax',
-      qs: { 
+      qs: {
         v: videoId,
         tr: 'time',
         distiller: '1',
         frags: 'comments',
-        spf: 'load' 
+        spf: 'load'
       },
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
-        'cache-control': 'no-cache' 
+        'cache-control': 'no-cache'
       },
       form: {
         session_token: sessionToken,
         client_url: 'https://www.youtube.com/watch?v=' + videoId
-      } 
+      }
     }).then(extractCommentCount).catch(function (reason) {
-      debug('Fetching comment page failed %d - %s', reason.statusCode, reason.error);
-      throw new Error(reason);
-    });
+      debug('Fetching comment page failed %d - %s', reason.statusCode, reason.error)
+      throw new Error(reason)
+    })
   }
 
   function parseVideoInfo (body) {
-    debug('Parsing YouTube page %s', videoId);
-    var $ = cheerio.load(body);
+    debug('Parsing YouTube page %s', videoId)
+    var $ = cheerio.load(body)
 
-    var url = extractValue($('.watch-main-col link[itemprop="url"]'), 'href');
-    var title = extractValue($('.watch-main-col meta[itemprop="name"]'), 'content');
-    var description = $('.watch-main-col #eow-description').html();
-    var owner = $('.yt-user-info > a').text();
-    var channelId = extractValue($('.watch-main-col meta[itemprop="channelId"]'), 'content');
-    var thumbnailUrl = extractValue($('.watch-main-col link[itemprop="thumbnailUrl"]'), 'href');
-    var embedURL = extractValue($('.watch-main-col link[itemprop="embedURL"]'), 'href');
-    var datePublished = extractValue($('.watch-main-col meta[itemprop="datePublished"]'), 'content');
-    var genre = extractValue($('.watch-main-col meta[itemprop="genre"]'), 'content');
+    var url = extractValue($('.watch-main-col link[itemprop="url"]'), 'href')
+    var title = extractValue($('.watch-main-col meta[itemprop="name"]'), 'content')
+    var description = $('.watch-main-col #eow-description').html()
+    var owner = $('.yt-user-info > a').text()
+    var channelId = extractValue($('.watch-main-col meta[itemprop="channelId"]'), 'content')
+    var thumbnailUrl = extractValue($('.watch-main-col link[itemprop="thumbnailUrl"]'), 'href')
+    var embedURL = extractValue($('.watch-main-col link[itemprop="embedURL"]'), 'href')
+    var datePublished = extractValue($('.watch-main-col meta[itemprop="datePublished"]'), 'content')
+    var genre = extractValue($('.watch-main-col meta[itemprop="genre"]'), 'content')
 
-    var paid = extractValue($('.watch-main-col meta[itemprop="paid"]'), 'content');
-    paid = paid ? (paid == 'True') : undefined;
+    var paid = extractValue($('.watch-main-col meta[itemprop="paid"]'), 'content')
+    paid = paid ? (paid == 'True') : undefined
 
-    var unlisted = extractValue($('.watch-main-col meta[itemprop="unlisted"]'), 'content');
-    unlisted = unlisted ? (unlisted == 'True') : undefined;
+    var unlisted = extractValue($('.watch-main-col meta[itemprop="unlisted"]'), 'content')
+    unlisted = unlisted ? (unlisted == 'True') : undefined
 
-    var isFamilyFriendly = extractValue($('.watch-main-col meta[itemprop="isFamilyFriendly"]'), 'content');
-    isFamilyFriendly = (isFamilyFriendly && isFamilyFriendly == 'True');
+    var isFamilyFriendly = extractValue($('.watch-main-col meta[itemprop="isFamilyFriendly"]'), 'content')
+    isFamilyFriendly = (isFamilyFriendly && isFamilyFriendly == 'True')
 
-    var duration = extractValue($('.watch-main-col meta[itemprop="duration"]'), 'content');
-    duration = duration ? parseDuration(duration) : undefined;
+    var duration = extractValue($('.watch-main-col meta[itemprop="duration"]'), 'content')
+    duration = duration ? parseDuration(duration) : undefined
 
-    var regionsAllowed = extractValue($('.watch-main-col meta[itemprop="regionsAllowed"]'), 'content');
-    regionsAllowed = regionsAllowed ? regionsAllowed.split(',') : undefined;
+    var regionsAllowed = extractValue($('.watch-main-col meta[itemprop="regionsAllowed"]'), 'content')
+    regionsAllowed = regionsAllowed ? regionsAllowed.split(',') : undefined
 
-    var views = extractValue($('.watch-main-col meta[itemprop="interactionCount"]'), 'content');
-    views = views ? parseInt(views, 10) : undefined;
+    var views = extractValue($('.watch-main-col meta[itemprop="interactionCount"]'), 'content')
+    views = views ? parseInt(views, 10) : undefined
 
     return {
       videoId: videoId,
@@ -125,42 +125,42 @@ module.exports = function fetchVideoInfo (videoId, callback) {
       duration: duration,
       views: views,
       regionsAllowed: regionsAllowed
-    };
+    }
   }
 }
 
-function extractSessionToken(body) {
-  var m = /XSRF_TOKEN':\s*"(.+?)",/i.exec(body);
-  return m ? m[1] : undefined;
+function extractSessionToken (body) {
+  var m = /XSRF_TOKEN':\s*"(.+?)",/i.exec(body)
+  return m ? m[1] : undefined
 }
 
-function extractCommentCount(body) {
-  var response = JSON.parse(body);
+function extractCommentCount (body) {
+  var response = JSON.parse(body)
   if (!response || !response.body || !response.body['watch-discussion']) {
-    return 0;
+    return 0
   }
-  
-  var $ = cheerio.load(response.body['watch-discussion']);
-  var m = /\(([\d,]+)\)/.exec($('.all-comments').text());
+
+  var $ = cheerio.load(response.body['watch-discussion'])
+  var m = /\(([\d,]+)\)/.exec($('.all-comments').text())
   if (!m || !m[1]) {
-    return 0;
+    return 0
   }
-  
-  return parseInt(m[1].replace(/[\s,]/g, ''), 10);
+
+  return parseInt(m[1].replace(/[\s,]/g, ''), 10)
 }
 
-function extractValue($, attribute) {
+function extractValue ($, attribute) {
   if ($ && $.length) {
-    return $.attr(attribute) || undefined;
+    return $.attr(attribute) || undefined
   }
-  return undefined;
+  return undefined
 }
 
-function parseDuration(raw) {
-  var m = /^[a-z]*(?:(\d+)M)?(\d+)S$/i.exec(raw);
-  if (!m) return;
+function parseDuration (raw) {
+  var m = /^[a-z]*(?:(\d+)M)?(\d+)S$/i.exec(raw)
+  if (!m) return
 
-  var minutes = m[1] ? parseInt(m[1], 10) : 0;
-  var seconds = m[2] ? parseInt(m[2], 10) : 0;
+  var minutes = m[1] ? parseInt(m[1], 10) : 0
+  var seconds = m[2] ? parseInt(m[2], 10) : 0
   return (minutes * 60) + seconds
 }
