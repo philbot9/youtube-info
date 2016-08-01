@@ -13,9 +13,12 @@ module.exports = function fetchVideoInfo (videoId, callback) {
   var pendingPromise = fetchVideoPage(videoId).then(function (body) {
     var videoInfo = parseVideoInfo(body)
     var sessionToken = extractSessionToken(body)
-
     debug('Found session token %s', sessionToken)
-    return fetchCommentCount(videoId, sessionToken).then(function (commentCount) {
+
+    var commentToken = extractCommentToken(body)
+    debug('Found comment token %s', commentToken)
+
+    return fetchCommentCount(videoId, sessionToken, commentToken).then(function (commentCount) {
       videoInfo.commentCount = commentCount
       return videoInfo
     })
@@ -50,15 +53,16 @@ module.exports = function fetchVideoInfo (videoId, callback) {
     })
   }
 
-  function fetchCommentCount (videoId, sessionToken) {
+  function fetchCommentCount (videoId, sessionToken, commentToken) {
     return request({
       jar: true,
       method: 'POST',
       url: 'https://www.youtube.com/watch_fragments_ajax',
       qs: {
         v: videoId,
-        tr: 'time',
+        tr: 'scroll',
         distiller: '1',
+        ctoken: commentToken,
         frags: 'comments',
         spf: 'load'
       },
@@ -91,13 +95,13 @@ module.exports = function fetchVideoInfo (videoId, callback) {
     var genre = extractValue($('.watch-main-col meta[itemprop="genre"]'), 'content')
 
     var paid = extractValue($('.watch-main-col meta[itemprop="paid"]'), 'content')
-    paid = paid ? (paid == 'True') : undefined
+    paid = paid ? (paid === 'True') : undefined
 
     var unlisted = extractValue($('.watch-main-col meta[itemprop="unlisted"]'), 'content')
-    unlisted = unlisted ? (unlisted == 'True') : undefined
+    unlisted = unlisted ? (unlisted === 'True') : undefined
 
     var isFamilyFriendly = extractValue($('.watch-main-col meta[itemprop="isFamilyFriendly"]'), 'content')
-    isFamilyFriendly = (isFamilyFriendly && isFamilyFriendly == 'True')
+    isFamilyFriendly = (isFamilyFriendly && isFamilyFriendly === 'True')
 
     var duration = extractValue($('.watch-main-col meta[itemprop="duration"]'), 'content')
     duration = duration ? parseDuration(duration) : undefined
@@ -134,6 +138,11 @@ function extractSessionToken (body) {
   return m ? m[1] : undefined
 }
 
+function extractCommentToken (body) {
+  var m = /COMMENTS_TOKEN':\s*"(.+?)",/i.exec(body)
+  return m ? m[1] : undefined
+}
+
 function extractCommentCount (body) {
   var response = JSON.parse(body)
   if (!response || !response.body || !response.body['watch-discussion']) {
@@ -141,7 +150,7 @@ function extractCommentCount (body) {
   }
 
   var $ = cheerio.load(response.body['watch-discussion'])
-  var m = /\(([\d,]+)\)/.exec($('.all-comments').text())
+  var m = /comments\s*.\s*([\d,]+)/i.exec($('.comment-section-header-renderer').text())
   if (!m || !m[1]) {
     return 0
   }
