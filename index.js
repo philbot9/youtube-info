@@ -45,10 +45,8 @@ module.exports = function fetchVideoInfo (videoId, callback) {
       jar: true,
       headers: {
         Host: 'www.youtube.com',
-        'User-Agent':
-          'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
-        Accept:
-          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
         Connection: 'keep-alive',
         'Cache-Control': 'max-age=0'
@@ -77,6 +75,7 @@ module.exports = function fetchVideoInfo (videoId, callback) {
         spf: 'load'
       },
       headers: {
+        'accept-language': 'en-US;q=1.0,en;q=0.9',
         'content-type': 'application/x-www-form-urlencoded',
         'cache-control': 'no-cache'
       },
