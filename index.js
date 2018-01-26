@@ -18,18 +18,22 @@ module.exports = function fetchVideoInfo (videoId, callback) {
     var commentToken = extractCommentToken(body)
     debug('Found comment token %s', commentToken)
 
-    return fetchCommentCount(videoId, sessionToken, commentToken).then(function (commentCount) {
+    return fetchCommentCount(videoId, sessionToken, commentToken).then(function (
+      commentCount
+    ) {
       videoInfo.commentCount = commentCount
       return videoInfo
     })
   })
 
   if (callback && isFunction(callback)) {
-    pendingPromise.then(function (result) {
-      callback(null, result)
-    }).catch(function (err) {
-      callback(err)
-    })
+    pendingPromise
+      .then(function (result) {
+        callback(null, result)
+      })
+      .catch(function (err) {
+        callback(err)
+      })
     return
   }
 
@@ -40,15 +44,21 @@ module.exports = function fetchVideoInfo (videoId, callback) {
       url: 'https://www.youtube.com/watch?v=' + videoId,
       jar: true,
       headers: {
-        'Host': 'www.youtube.com',
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        Host: 'www.youtube.com',
+        'User-Agent':
+          'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'Cache-Control': 'max-age=0'
       }
     }).catch(function (reason) {
-      debug('Fetching video page failed %d - %s', reason.statusCode, reason.error)
+      debug(
+        'Fetching video page failed %d - %s',
+        reason.statusCode,
+        reason.error
+      )
       throw new Error(reason)
     })
   }
@@ -74,10 +84,16 @@ module.exports = function fetchVideoInfo (videoId, callback) {
         session_token: sessionToken,
         client_url: 'https://www.youtube.com/watch?v=' + videoId
       }
-    }).then(extractCommentCount).catch(function (reason) {
-      debug('Fetching comment page failed %d - %s', reason.statusCode, reason.error)
-      throw new Error(reason)
     })
+      .then(extractCommentCount)
+      .catch(function (reason) {
+        debug(
+          'Fetching comment page failed %d - %s',
+          reason.statusCode,
+          reason.error
+        )
+        throw new Error(reason)
+      })
   }
 
   function parseVideoInfo (body) {
@@ -85,31 +101,67 @@ module.exports = function fetchVideoInfo (videoId, callback) {
     var $ = cheerio.load(body)
 
     var url = extractValue($('.watch-main-col link[itemprop="url"]'), 'href')
-    var title = extractValue($('.watch-main-col meta[itemprop="name"]'), 'content')
+    var title = extractValue(
+      $('.watch-main-col meta[itemprop="name"]'),
+      'content'
+    )
     var description = $('.watch-main-col #eow-description').html()
     var owner = $('.yt-user-info > a').text()
-    var channelId = extractValue($('.watch-main-col meta[itemprop="channelId"]'), 'content')
-    var thumbnailUrl = extractValue($('.watch-main-col link[itemprop="thumbnailUrl"]'), 'href')
-    var embedURL = extractValue($('.watch-main-col link[itemprop="embedURL"]'), 'href')
-    var datePublished = extractValue($('.watch-main-col meta[itemprop="datePublished"]'), 'content')
-    var genre = extractValue($('.watch-main-col meta[itemprop="genre"]'), 'content')
+    var channelId = extractValue(
+      $('.watch-main-col meta[itemprop="channelId"]'),
+      'content'
+    )
+    var thumbnailUrl = extractValue(
+      $('.watch-main-col link[itemprop="thumbnailUrl"]'),
+      'href'
+    )
+    var embedURL = extractValue(
+      $('.watch-main-col link[itemprop="embedURL"]'),
+      'href'
+    )
+    var datePublished = extractValue(
+      $('.watch-main-col meta[itemprop="datePublished"]'),
+      'content'
+    )
+    var genre = extractValue(
+      $('.watch-main-col meta[itemprop="genre"]'),
+      'content'
+    )
 
-    var paid = extractValue($('.watch-main-col meta[itemprop="paid"]'), 'content')
-    paid = paid ? (paid === 'True') : undefined
+    var paid = extractValue(
+      $('.watch-main-col meta[itemprop="paid"]'),
+      'content'
+    )
+    paid = paid ? paid === 'True' : undefined
 
-    var unlisted = extractValue($('.watch-main-col meta[itemprop="unlisted"]'), 'content')
-    unlisted = unlisted ? (unlisted === 'True') : undefined
+    var unlisted = extractValue(
+      $('.watch-main-col meta[itemprop="unlisted"]'),
+      'content'
+    )
+    unlisted = unlisted ? unlisted === 'True' : undefined
 
-    var isFamilyFriendly = extractValue($('.watch-main-col meta[itemprop="isFamilyFriendly"]'), 'content')
-    isFamilyFriendly = (isFamilyFriendly && isFamilyFriendly === 'True')
+    var isFamilyFriendly = extractValue(
+      $('.watch-main-col meta[itemprop="isFamilyFriendly"]'),
+      'content'
+    )
+    isFamilyFriendly = isFamilyFriendly && isFamilyFriendly === 'True'
 
-    var duration = extractValue($('.watch-main-col meta[itemprop="duration"]'), 'content')
+    var duration = extractValue(
+      $('.watch-main-col meta[itemprop="duration"]'),
+      'content'
+    )
     duration = duration ? parseDuration(duration) : undefined
 
-    var regionsAllowed = extractValue($('.watch-main-col meta[itemprop="regionsAllowed"]'), 'content')
+    var regionsAllowed = extractValue(
+      $('.watch-main-col meta[itemprop="regionsAllowed"]'),
+      'content'
+    )
     regionsAllowed = regionsAllowed ? regionsAllowed.split(',') : undefined
 
-    var views = extractValue($('.watch-main-col meta[itemprop="interactionCount"]'), 'content')
+    var views = extractValue(
+      $('.watch-main-col meta[itemprop="interactionCount"]'),
+      'content'
+    )
     views = views ? parseInt(views, 10) : undefined
 
     return {
@@ -150,7 +202,9 @@ function extractCommentCount (body) {
   }
 
   var $ = cheerio.load(response.body['watch-discussion'])
-  var m = /comments\s*.\s*([\d,]+)/i.exec($('.comment-section-header-renderer').text())
+  var m = /comments\s*.\s*([\d,]+)/i.exec(
+    $('.comment-section-header-renderer').text()
+  )
   if (!m || !m[1]) {
     return 0
   }
@@ -171,5 +225,5 @@ function parseDuration (raw) {
 
   var minutes = m[1] ? parseInt(m[1], 10) : 0
   var seconds = m[2] ? parseInt(m[2], 10) : 0
-  return (minutes * 60) + seconds
+  return minutes * 60 + seconds
 }
