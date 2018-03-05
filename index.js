@@ -163,10 +163,10 @@ module.exports = function fetchVideoInfo (videoId, callback) {
     )
     views = views ? parseInt(views, 10) : undefined
 
-    var dislikeCount = $('.like-button-renderer-dislike-button span').html();
+    var dislikeCount = $('.like-button-renderer-dislike-button-unclicked span').text();
     dislikeCount = dislikeCount ? parseVotes(dislikeCount) : undefined
 
-    var likeCount = $('.like-button-renderer-like-button span').html();
+    var likeCount = $('.like-button-renderer-like-button-unclicked span').text();
     likeCount = likeCount ? parseVotes(likeCount) : undefined
 
     return {
