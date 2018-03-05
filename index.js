@@ -163,6 +163,12 @@ module.exports = function fetchVideoInfo (videoId, callback) {
     )
     views = views ? parseInt(views, 10) : undefined
 
+    var dislikeCount = $('.like-button-renderer-dislike-button-unclicked span').text();
+    dislikeCount = dislikeCount ? parseVotes(dislikeCount) : undefined
+
+    var likeCount = $('.like-button-renderer-like-button-unclicked span').text();
+    likeCount = likeCount ? parseVotes(likeCount) : undefined
+
     return {
       videoId: videoId,
       url: url,
@@ -179,7 +185,9 @@ module.exports = function fetchVideoInfo (videoId, callback) {
       isFamilyFriendly: isFamilyFriendly,
       duration: duration,
       views: views,
-      regionsAllowed: regionsAllowed
+      regionsAllowed: regionsAllowed,
+      dislikeCount: dislikeCount,
+      likeCount: likeCount
     }
   }
 }
@@ -225,4 +233,9 @@ function parseDuration (raw) {
   var minutes = m[1] ? parseInt(m[1], 10) : 0
   var seconds = m[2] ? parseInt(m[2], 10) : 0
   return minutes * 60 + seconds
+}
+
+function parseVotes(raw) {
+  var rawCleaned = raw.split(",").join("");
+  return parseInt(rawCleaned, 10);
 }
