@@ -10,6 +10,8 @@ module.exports = function fetchVideoInfo (videoId, callback) {
 
   debug('Fetching YouTube page for %s', videoId)
 
+  var cookieJar = request.jar()
+
   var pendingPromise = fetchVideoPage(videoId).then(function (body) {
     var videoInfo = parseVideoInfo(body)
     var sessionToken = extractSessionToken(body)
@@ -42,7 +44,7 @@ module.exports = function fetchVideoInfo (videoId, callback) {
   function fetchVideoPage (videoId) {
     return request({
       url: 'https://www.youtube.com/watch?v=' + videoId,
-      jar: true,
+      jar: cookieJar,
       headers: {
         Host: 'www.youtube.com',
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
@@ -63,7 +65,7 @@ module.exports = function fetchVideoInfo (videoId, callback) {
 
   function fetchCommentCount (videoId, sessionToken, commentToken) {
     return request({
-      jar: true,
+      jar: cookieJar,
       method: 'POST',
       url: 'https://www.youtube.com/watch_fragments_ajax',
       qs: {
