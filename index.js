@@ -163,10 +163,12 @@ module.exports = function fetchVideoInfo (videoId, callback) {
     )
     views = views ? parseInt(views, 10) : undefined
 
-    var dislikeCount = $('.like-button-renderer-dislike-button-unclicked span').text();
+    var dislikeCount = $(
+      '.like-button-renderer-dislike-button-unclicked span'
+    ).text()
     dislikeCount = dislikeCount ? parseVotes(dislikeCount) : undefined
 
-    var likeCount = $('.like-button-renderer-like-button-unclicked span').text();
+    var likeCount = $('.like-button-renderer-like-button-unclicked span').text()
     likeCount = likeCount ? parseVotes(likeCount) : undefined
 
     return {
@@ -235,7 +237,7 @@ function parseDuration (raw) {
   return minutes * 60 + seconds
 }
 
-function parseVotes(raw) {
-  var rawCleaned = raw.split(",").join("");
-  return parseInt(rawCleaned, 10);
+function parseVotes (raw) {
+  var rawCleaned = raw.split(',').join('')
+  return parseInt(rawCleaned, 10)
 }
