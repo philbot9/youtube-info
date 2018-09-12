@@ -1,6 +1,6 @@
 {
   "name": "youtube-info",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Fetch meta information about YouTube videos",
   "main": "index.js",
   "scripts": {
