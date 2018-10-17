@@ -173,6 +173,8 @@ module.exports = function fetchVideoInfo (videoId, callback) {
     var likeCount = $('.like-button-renderer-like-button-unclicked span').text()
     likeCount = likeCount ? parseVotes(likeCount) : undefined
 
+    var channelThumbnailUrl =  $('.yt-user-photo .yt-thumb-clip img').data('thumb')
+
     return {
       videoId: videoId,
       url: url,
@@ -191,7 +193,8 @@ module.exports = function fetchVideoInfo (videoId, callback) {
       views: views,
       regionsAllowed: regionsAllowed,
       dislikeCount: dislikeCount,
-      likeCount: likeCount
+      likeCount: likeCount,
+      channelThumbnailUrl: channelThumbnailUrl
     }
   }
 }

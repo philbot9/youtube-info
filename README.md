@@ -71,7 +71,8 @@ fetchVideoInfo('{videoId}', function (err, videoInfo) {
   regionsAllowed: [ '{two letter country code}', ... ],
   commentCount: {number of comments},
   likeCount: {number of likes},
-  dislikeCount: {number of dislikes}
+  dislikeCount: {number of dislikes},
+  channelThumbnailUrl: {channel thumbnail url}
 }
 
 ```
