@@ -216,7 +216,7 @@ function extractCommentCount (body) {
   }
 
   var $ = cheerio.load(response.body['watch-discussion'])
-  var m = /comments\s*.\s*([\d,]+)/i.exec(
+  var m = /comments?\s*.\s*([\d,]+)/i.exec(
     $('.comment-section-header-renderer').text()
   )
   if (!m || !m[1]) {
