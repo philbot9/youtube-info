@@ -3,7 +3,7 @@ var cheerio = require('cheerio')
 var debug = require('debug')('youtube-video-info')
 var isFunction = require('lodash.isfunction')
 
-module.exports = function fetchVideoInfo (videoId, callback) {
+module.exports = function fetchVideoInfo (videoId, callback, acceptLanguage='en-US,en;q=0.5', userAgent='Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0') {
   if (!videoId) {
     throw new Error('No video ID was provided.')
   }
@@ -52,9 +52,9 @@ module.exports = function fetchVideoInfo (videoId, callback) {
       jar: cookieJar,
       headers: {
         Host: 'www.youtube.com',
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
+        'User-Agent': userAgent,
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Language': acceptLanguage,
         Connection: 'keep-alive',
         'Cache-Control': 'max-age=0'
       }
