@@ -47,6 +47,17 @@ describe('youtube-info', function () {
     }).to.throw(Error)
   })
 
+  it('should fail if video does not exist', () => {
+    this.timeout(60000)
+    return fetchVideoInfo('abc123xyz')
+      .then(videoInfo => {
+        expect.fail('Should fail')
+      })
+      .catch(e => {
+        expect(/not exist/i.test(e.message)).to.be.true
+      })
+  })
+
   it('should return video info', function () {
     this.timeout(60000)
     return fetchVideoInfo('P701paKEMXs').then(function (videoInfo) {

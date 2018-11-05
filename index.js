@@ -14,6 +14,11 @@ module.exports = function fetchVideoInfo (videoId, callback) {
 
   var pendingPromise = fetchVideoPage(videoId).then(function (body) {
     var videoInfo = parseVideoInfo(body)
+
+    if (!videoInfo || !videoInfo.title) {
+      throw new Error("Video does not exist")
+    }
+
     var sessionToken = extractSessionToken(body)
     debug('Found session token %s', sessionToken)
 
