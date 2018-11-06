@@ -3,9 +3,14 @@ var cheerio = require('cheerio')
 var debug = require('debug')('youtube-video-info')
 var isFunction = require('lodash.isfunction')
 
-module.exports = function fetchVideoInfo (videoId, callback, acceptLanguage='en-US,en;q=0.5', userAgent='Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0') {
+module.exports = function fetchVideoInfo (videoId, opts, callback) {
   if (!videoId) {
     throw new Error('No video ID was provided.')
+  }
+
+  const language = (opts && typeof opts === 'object' && "language" in opts) ? opts.language : 'en-US'
+  if (opts && isFunction(opts)) {
+    callback = opts
   }
 
   debug('Fetching YouTube page for %s', videoId)
@@ -52,9 +57,9 @@ module.exports = function fetchVideoInfo (videoId, callback, acceptLanguage='en-
       jar: cookieJar,
       headers: {
         Host: 'www.youtube.com',
-        'User-Agent': userAgent,
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': acceptLanguage,
+        'Accept-Language': language,
         Connection: 'keep-alive',
         'Cache-Control': 'max-age=0'
       }
