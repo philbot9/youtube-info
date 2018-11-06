@@ -3,9 +3,14 @@ var cheerio = require('cheerio')
 var debug = require('debug')('youtube-video-info')
 var isFunction = require('lodash.isfunction')
 
-module.exports = function fetchVideoInfo (videoId, callback) {
+module.exports = function fetchVideoInfo (videoId, opts, callback) {
   if (!videoId) {
     throw new Error('No video ID was provided.')
+  }
+
+  const language = (opts && typeof opts === 'object' && "language" in opts) ? opts.language : 'en-US'
+  if (opts && isFunction(opts)) {
+    callback = opts
   }
 
   debug('Fetching YouTube page for %s', videoId)
@@ -54,7 +59,7 @@ module.exports = function fetchVideoInfo (videoId, callback) {
         Host: 'www.youtube.com',
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0',
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Language': language,
         Connection: 'keep-alive',
         'Cache-Control': 'max-age=0'
       }
@@ -104,10 +109,10 @@ module.exports = function fetchVideoInfo (videoId, callback) {
 
   function parseVideoInfo (body) {
     debug('Parsing YouTube page %s', videoId)
-    var $ = cheerio.load(body)
+    var $ = cheerio.load(body, {decodeEntities: false})
 
     var url = extractValue($('.watch-main-col link[itemprop="url"]'), 'href')
-    var title = extractValue(
+    var title = $('#eow-title').text().replace(/^\s+|\s+$/g, '') || extractValue(
       $('.watch-main-col meta[itemprop="name"]'),
       'content'
     )
