@@ -1,7 +1,6 @@
-var request = require('request-promise')
-var cheerio = require('cheerio')
-var debug = require('debug')('youtube-video-info')
-var isFunction = require('lodash.isfunction')
+const request = require('request-promise')
+const cheerio = require('cheerio')
+const debug = require('debug')('youtube-video-info')
 
 module.exports = function fetchVideoInfo (videoId, opts, callback) {
   if (!videoId) {
@@ -9,7 +8,7 @@ module.exports = function fetchVideoInfo (videoId, opts, callback) {
   }
 
   const language = (opts && typeof opts === 'object' && "language" in opts) ? opts.language : 'en-US'
-  if (opts && isFunction(opts)) {
+  if (opts && typeof opts === 'function') {
     callback = opts
   }
 
@@ -38,7 +37,7 @@ module.exports = function fetchVideoInfo (videoId, opts, callback) {
     })
   })
 
-  if (callback && isFunction(callback)) {
+  if (callback && typeof callback === 'function') {
     pendingPromise
       .then(function (result) {
         callback(null, result)
@@ -112,6 +111,7 @@ module.exports = function fetchVideoInfo (videoId, opts, callback) {
     var $ = cheerio.load(body, {decodeEntities: false})
 
     var url = extractValue($('.watch-main-col link[itemprop="url"]'), 'href')
+    let language = $('html').attr('lang') || language
     var title = $('#eow-title').text().replace(/^\s+|\s+$/g, '') || extractValue(
       $('.watch-main-col meta[itemprop="name"]'),
       'content'
@@ -185,9 +185,15 @@ module.exports = function fetchVideoInfo (videoId, opts, callback) {
 
     var channelThumbnailUrl =  $('.yt-user-photo .yt-thumb-clip img').data('thumb')
 
+    const tags = [];
+    $('meta[property="og:video:tag"]').each(function(i, elem) {
+      tags[i] = $(this).attr('content');
+    });
+
     return {
       videoId: videoId,
       url: url,
+      language: language,
       title: title,
       description: description,
       owner: owner,
@@ -204,7 +210,8 @@ module.exports = function fetchVideoInfo (videoId, opts, callback) {
       regionsAllowed: regionsAllowed,
       dislikeCount: dislikeCount,
       likeCount: likeCount,
-      channelThumbnailUrl: channelThumbnailUrl
+      channelThumbnailUrl: channelThumbnailUrl,
+      tags: tags
     }
   }
 }
