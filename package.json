@@ -4,7 +4,8 @@
   "description": "Fetch meta information about YouTube videos",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
     "format": "prettier-standard ./*.js ./test/*.js"
   },
   "repository": {
@@ -22,15 +23,21 @@
   "author": "Philip Klostermann <philip.klostermann@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "cheerio": "^0.19.0",
+    "cheerio": "^1.0.0-rc.2",
     "debug": "^2.2.0",
+    "html-to-text": "^4.0.0",
     "lodash.isfunction": "^3.0.6",
-    "request": "2.81.0",
+    "lodash.isobject": "^3.0.2",
+    "lodash.omit": "^4.5.0",
+    "ramda": "^0.25.0",
+    "request": "^2.88.0",
     "request-promise": "^4.2.2"
   },
   "devDependencies": {
-    "chai": "^3.4.1",
-    "mocha": "^2.3.4",
-    "prettier-standard": "^8.0.0"
+    "jest": "^23.6.0",
+    "prettier-standard": "^8.0.1"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
