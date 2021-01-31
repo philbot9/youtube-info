@@ -1,6 +1,8 @@
 # Youtube Info
 
-[![Build Status](https://travis-ci.org/philbot9/youtube-info.svg?branch=master)](https://travis-ci.org/philbot9/youtube-info)
+## Deprecation Notice
+
+This package has been deprecated and no longer works.
 
 ## Purpose
 
@@ -20,33 +22,33 @@ $ npm install youtube-info
 
 `http//www.youtube.com/watch?v={videoId}`
 
-``` javascript
-var fetchVideoInfo = require('youtube-info');
-fetchVideoInfo(videoId, cb);
+```javascript
+var fetchVideoInfo = require('youtube-info')
+fetchVideoInfo(videoId, cb)
 ```
 
-| Parameter     | Meaning       |
-|:--------------|:---------------|
-| videoId       | ID of youtube Video |
-| callback      | (optional) callback function |
+| Parameter | Meaning                      |
+| :-------- | :--------------------------- |
+| videoId   | ID of youtube Video          |
+| callback  | (optional) callback function |
 
 ### Promises API
 
-``` javascript
-var fetchVideoInfo = require('youtube-info');
+```javascript
+var fetchVideoInfo = require('youtube-info')
 fetchVideoInfo('{videoId}').then(function (videoInfo) {
-  console.log(videoInfo);
-});
+  console.log(videoInfo)
+})
 ```
 
 ### Callback API
 
-``` javascript
-var fetchVideoInfo = require('youtube-info');
+```javascript
+var fetchVideoInfo = require('youtube-info')
 fetchVideoInfo('{videoId}', function (err, videoInfo) {
-  if (err) throw new Error(err);
-  console.log(videoInfo);
-});
+  if (err) throw new Error(err)
+  console.log(videoInfo)
+})
 ```
 
 ## Result
